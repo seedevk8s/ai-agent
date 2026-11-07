@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Frodo Knowledge Agent — 문서·웹 도구를 선택하는 지식 에이전트">
+  <title>Frodo Knowledge Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1.0">
+  <style>
+    .rewritten-queries{margin-top:16px}
+    .rewritten-queries summary{color:#79542e;font-size:12px;font-weight:700}
+    .rewritten-query{margin-top:8px;padding:10px 12px;background:#f4f3f1;border-left:3px solid #f9dfb9;border-radius:8px;color:#1a1c1b;font-size:11px;line-height:1.5}
+    .version-chip{margin-left:-20px;font:800 16px "JetBrains Mono";letter-spacing:.04em;color:#79542e;background:#f9dfb9;padding:10px 16px;border-radius:24px;box-shadow:0 4px 12px rgba(121,84,46,.12)}
+    .api-instance{display:flex;flex:0 0 auto;align-items:center;gap:18px;font:600 10px "JetBrains Mono";line-height:1.25;white-space:nowrap}
+    .api-value{color:#443b34;font-size:10px}
+    .model-picker{display:flex;align-items:center;gap:6px;color:#6f675f;font-size:10px}
+    .model-picker select{border:1px solid #d4c4b7;border-radius:7px;background:#faf9f7;color:#79542e;padding:5px 8px;font:600 10px "JetBrains Mono";outline:none}
+    .model-picker select:focus{border-color:#79542e}
+    .identifier-group{display:flex;gap:6px}.thread-chip{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid #d4c4b7;border-radius:8px;background:#fff;padding:6px 9px;color:#6f675f;font:600 9px "JetBrains Mono";cursor:pointer}
+    .thread-chip:hover{border-color:#79542e;color:#79542e}
+    @media(max-width:1350px){.thread-chip{max-width:120px}}
+    @media(max-width:1150px){.top-actions .avatar{display:none}.identifier-group{display:none}}
+    @media(max-width:700px){.topbar>div:first-of-type strong{display:none}.api-instance{gap:9px}.api-value{font-size:9px}.version-chip{margin-left:0;font-size:14px;padding:8px 12px}}
+    .auth-gate{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at top,#f9dfb9 0,#faf9f7 42%);display:grid;place-items:center;padding:20px}
+    .auth-card{width:min(430px,100%);background:#fff;border:1px solid rgba(130,117,106,.22);border-radius:22px;padding:34px;box-shadow:0 24px 70px rgba(70,50,32,.16)}
+    .auth-brand{padding:0 0 30px}.auth-card h1{font:700 34px Manrope;margin:0 0 8px}.auth-intro{color:var(--muted);margin:0 0 24px}
+    .auth-card label{display:grid;gap:7px;font-weight:700;font-size:12px;margin:14px 0}.auth-card input{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;outline:0}.auth-card input:focus{border-color:var(--primary)}
+    .auth-error{color:var(--danger);font-size:12px}.auth-switch{display:block;margin:18px auto 0}.user-menu{border:0;background:transparent;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:11px}.full{width:100%;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <div class="brand auth-brand"><div class="brand-symbol">F</div><div><strong>Frodo</strong><span>PERSONAL KNOWLEDGE AGENT</span></div></div>
+      <p class="kicker">YOUR MEMORY, SECURELY YOURS</p>
+      <h1 id="authTitle">로그인</h1>
+      <p id="authIntro" class="auth-intro">대화와 장기 기억을 안전하게 이어가세요.</p>
+      <form id="authForm">
+        <label id="nameField" class="hidden">이름<input id="authName" maxlength="60" autocomplete="name" placeholder="표시할 이름"></label>
+        <label>이메일<input id="authEmail" type="email" maxlength="254" autocomplete="email" required placeholder="you@example.com"></label>
+        <label>비밀번호<input id="authPassword" type="password" minlength="8" maxlength="128" autocomplete="current-password" required placeholder="8자 이상"></label>
+        <p id="authError" class="auth-error hidden"></p>
+        <button id="authSubmit" class="primary full" type="submit">로그인</button>
+      </form>
+      <button id="authSwitch" class="text-button auth-switch" type="button">계정이 없나요? 회원가입</button>
+    </div>
+  </div>
+  <div class="shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="brand"><div class="brand-symbol">F</div><div><strong>Frodo</strong><span>KNOWLEDGE AGENT</span></div></div>
+      <button id="newChat" class="new-chat"><span>＋</span> 새로운 대화</button>
+      <nav>
+        <button class="nav-link active" data-view="chat"><i>⌕</i><span>지식 검색</span></button>
+        <button class="nav-link" data-view="documents"><i>⇧</i><span>문서 보관함</span><b id="docBadge">0</b></button>
+        <button class="nav-link" data-view="history"><i>◷</i><span>히스토리</span></button>
+        <button id="apiDocs" class="nav-link"><i>↗</i><span>API 문서</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="connection"><span id="statusDot"></span><div><strong id="statusText">연결 확인 중</strong><small id="statusDetail">Agent API</small></div></div>
+      </div>
+    </aside>
+
+    <header class="topbar">
+      <button id="menuButton" class="icon-btn menu">☰</button>
+      <div><span class="crumb">WORKSPACE</span><strong id="pageTitle">지식 검색</strong></div>
+      <div class="top-actions"><span id="apiVersion" class="version-chip">API v1.0</span><span class="identifier-group"><button id="threadId" class="thread-chip" type="button" title="현재 LangGraph thread_id · 클릭하여 복사">THREAD · 확인 중</button><button id="checkpointId" class="thread-chip" type="button" title="최신 LangGraph checkpoint_id · 클릭하여 복사">CHECKPOINT · 아직 없음</button></span><span class="api-instance" title="현재 응답한 API Pod"><span id="apiHostname" class="api-value">확인 중</span><span id="apiIp" class="api-value">확인 중</span></span><span class="agent-state"><i></i> AGENT ONLINE</span><button id="userMenu" class="user-menu" title="로그아웃"><span id="userName">사용자</span><span id="userAvatar" class="avatar">U</span></button></div>
+    </header>
+
+    <main>
+      <section id="chatView" class="view active reading-lane">
+        <div id="welcome" class="welcome">
+          <div class="assistant-mark"><span>✦</span></div>
+          <p class="kicker">YOUR PERSISTENT KNOWLEDGE AGENT</p>
+          <h1>무엇이든 <em>질문하세요</em></h1>
+          <p class="intro">질문을 이해한 에이전트가 문서 검색과 웹 검색 도구 중 필요한 것만 선택해 답합니다.</p>
+        </div>
+        <div id="conversation" class="conversation hidden"></div>
+        <form id="queryForm" class="composer">
+          <textarea id="question" rows="1" maxlength="2000" placeholder="질문을 입력하세요…"></textarea>
+          <div class="composer-meta">
+            <label class="model-picker" title="질문 처리와 도구 라우팅에 사용할 엔진">
+              엔진
+              <select id="modelSelect" aria-label="LLM 엔진 선택">
+                <option value="gpt-5-mini">gpt-5-mini</option>
+                <option value="gpt-5.4-mini">gpt-5.4-mini</option>
+                <option value="gpt-5.6">gpt-5.6</option>
+                <option value="gpt-5.6-sol">gpt-5.6-sol</option>
+                <option value="gpt-5.6-terra">gpt-5.6-terra</option>
+                <option value="gpt-5.6-luna">gpt-5.6-luna</option>
+              </select>
+            </label>
+            <span><kbd>Enter</kbd> 전송 · <kbd>Shift</kbd> + <kbd>Enter</kbd> 줄바꿈</span>
+            <button id="sendButton" type="submit" aria-label="전송">↑</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="documentsView" class="view content-wide">
+        <div class="page-head"><div><p class="kicker">KNOWLEDGE BASE</p><h2>문서 보관함</h2><p>Agent가 학습하고 검색할 파일을 관리합니다.</p></div><button id="uploadCta" class="primary">＋ 파일 추가</button></div>
+        <div id="dropzone" class="dropzone" tabindex="0">
+          <input id="fileInput" type="file" multiple accept=".pdf,.docx,.txt,.md,.csv" hidden>
+          <div class="upload-icon">⇧</div><h3>파일을 여기에 놓으세요</h3><p>또는 클릭하여 파일 선택 · PDF, DOCX, TXT, MD, CSV · 파일당 최대 20MB</p>
+        </div>
+        <div id="uploadQueue" class="upload-queue hidden"></div>
+        <div class="library-head"><div><h3>등록된 지식</h3><span id="libraryCount">0개의 문서</span></div><button id="refreshDocs" class="text-button">새로고침 ↻</button></div>
+        <div id="documentGrid" class="document-grid"><div class="empty"><span>▱</span><p>등록된 문서를 불러오는 중입니다.</p></div></div>
+      </section>
+
+      <section id="historyView" class="view reading-lane">
+        <div class="page-head"><div><p class="kicker">CONVERSATION MEMORY</p><h2>대화 히스토리</h2><p>PostgreSQL에 영구 저장된 대화를 이어서 질문할 수 있습니다.</p></div><button id="clearHistory" class="text-button danger">모두 지우기</button></div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="app.js?v=1.0"></script>
+</body></html>

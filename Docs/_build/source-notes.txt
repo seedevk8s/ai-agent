@@ -1,0 +1,9 @@
+Project-only sources used for this deck:
+- C:\apps\myllm-3\AI.md, section 17 (State, Checkpointer, Store)
+- C:\apps\myllm-3\api\app\graph.py
+- C:\apps\myllm-3\api\app\conversation_store.py
+- C:\apps\myllm-3\api\app\main.py
+- C:\apps\myllm-3\api\app\memory.py
+- C:\apps\myllm-3\front\app.js
+
+No external web claims or assets were used.
