@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-app-config
+  labels:
+    app: api-app
+data:
+  # API 및 인증
+  PORT: "8000"
+  FRONTEND_ORIGINS: "http://localhost,http://127.0.0.1,http://localhost:3000,http://127.0.0.1:3000"
+  JWT_EXPIRE_MINUTES: "10080"
+
+  # LLM 및 Tool 호출
+  LLM_MODEL: "gpt-5-mini"
+  ALLOWED_LLM_MODELS: "gpt-5-mini,gpt-5.4-mini,gpt-5.6,gpt-5.6-sol,gpt-5.6-terra,gpt-5.6-luna"
+  MAX_TOOL_CALLS: "4"
+
+  # 문서 업로드 및 벡터 저장
+  VECTOR_DB_URL: "http://vector-db-headless:6333"
+  VECTOR_COLLECTION: "api_documents"
+  EMBEDDING_MODEL: "text-embedding-3-small"
+  EMBEDDING_DIMENSIONS: "1536"
+  CHUNK_SIZE: "1200"
+  CHUNK_OVERLAP: "180"
+  MAX_UPLOAD_BYTES: "20971520"
+
+  # 검색 및 질문 재작성
+  RETRIEVAL_CANDIDATES: "20"
+  RETRIEVAL_FINAL_K: "5"
+  RETRIEVAL_MIN_SCORE: "0.35"
+  RETRIEVAL_DEDUP_THRESHOLD: "0.9"
+  ENABLE_QUERY_REWRITE: "true"
+  QUERY_REWRITE_MODEL: "gpt-5-mini"

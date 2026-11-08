@@ -5,6 +5,10 @@
 !.env.example
 !*.env.example
 
+# ===== Kubernetes secrets =====
+k8s/**/secret.yaml
+!k8s/**/secret.example.yaml
+
 # ===== Python =====
 __pycache__/
 *.py[cod]

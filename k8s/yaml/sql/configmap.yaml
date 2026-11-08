@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frodo-db-config
+  labels:
+    app: sql
+data:
+  POSTGRES_HOST: "sql-headless"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "frodo"
+  POSTGRES_DB: "frodo"
+  DATABASE_POOL_SIZE: "10"
